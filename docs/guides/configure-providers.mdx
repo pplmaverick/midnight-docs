@@ -331,7 +331,55 @@ The `deployContract` and `findDeployedContract` functions take the `MidnightProv
 For more information on using these functions, see the [Midnight.js SDK](/sdks/official/midnight-js) documentation.
 
 :::
+## Using levelPrivateStateProvider in browser dApps
 
+The `levelPrivateStateProvider` works in browser environments. Set `cryptoBackend: 'webcrypto'`
+to make the backend selection explicit — the SDK auto-detects Web Crypto availability, but
+setting it explicitly ensures predictable behavior across environments:
+
+```typescript
+import { levelPrivateStateProvider } from '@midnight-ntwrk/midnight-js-level-private-state-provider';
+
+const providers: MyProviders = {
+  privateStateProvider: levelPrivateStateProvider({
+    privateStateStoreName: 'my-contract-private-state',
+    signingKeyStoreName: 'my-contract-private-state-signing-keys',
+    privateStoragePasswordProvider: () => 'your-encryption-password',
+    cryptoBackend: 'webcrypto', // explicit — recommended for browser dApps
+  }),
+  // ...other providers
+};
+```
+
+The `level` package automatically selects `browser-level` (IndexedDB) when bundled for
+browsers, so no additional configuration is needed for storage.
+
+### Early password validation with a canary
+
+Without additional checks, a wrong password isn't caught until the app attempts to decrypt
+real private state data — which may happen deep inside a transaction flow — producing an
+opaque WebCrypto `OperationError` instead of a clear message at unlock time.
+
+A canary value written on first unlock lets you validate the password immediately:
+
+```typescript
+const CANARY_KEY = '__canary__';
+const CANARY_VALUE = 'midnight-verified';
+
+async function unlockWithVerification(provider: PrivateStateProvider) {
+  try {
+    const existing = await provider.get(CANARY_KEY);
+    if (existing === null) {
+      // First unlock: write canary
+      await provider.set(CANARY_KEY, CANARY_VALUE);
+    }
+    // If get() resolved without throwing, AES-GCM auth tag passed —
+    // password is correct.
+  } catch {
+    throw new Error('Incorrect password — private state could not be decrypted');
+  }
+}
+```
 ## Next steps
 
 With your providers configured, you are ready to deploy and interact with smart contracts on the Midnight Network. The following resources cover the next steps in that workflow:
