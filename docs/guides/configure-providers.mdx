@@ -345,6 +345,7 @@ const providers: MyProviders = {
   privateStateProvider: levelPrivateStateProvider({
     privateStateStoreName: 'my-contract-private-state',
     signingKeyStoreName: 'my-contract-private-state-signing-keys',
+    accountId: walletAddress,
     privateStoragePasswordProvider: () => 'your-encryption-password',
     cryptoBackend: 'webcrypto', // explicit; recommended for browser DApps
   }),
@@ -381,6 +382,7 @@ async function unlockWithVerification(provider: PrivateStateProvider) {
   }
 }
 ```
+
 ## Next steps
 
 With your providers configured, you are ready to deploy and interact with smart contracts on the Midnight Network. The following resources cover the next steps in that workflow:
