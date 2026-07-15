@@ -331,10 +331,11 @@ The `deployContract` and `findDeployedContract` functions take the `MidnightProv
 For more information on using these functions, see the [Midnight.js SDK](/sdks/official/midnight-js) documentation.
 
 :::
-## Using levelPrivateStateProvider in browser dApps
+
+## Using levelPrivateStateProvider in browser DApps
 
 The `levelPrivateStateProvider` works in browser environments. Set `cryptoBackend: 'webcrypto'`
-to make the backend selection explicit — the SDK auto-detects Web Crypto availability, but
+to make the backend selection explicit. The SDK auto-detects Web Crypto availability, but
 setting it explicitly ensures predictable behavior across environments:
 
 ```typescript
@@ -345,7 +346,7 @@ const providers: MyProviders = {
     privateStateStoreName: 'my-contract-private-state',
     signingKeyStoreName: 'my-contract-private-state-signing-keys',
     privateStoragePasswordProvider: () => 'your-encryption-password',
-    cryptoBackend: 'webcrypto', // explicit — recommended for browser dApps
+    cryptoBackend: 'webcrypto', // explicit; recommended for browser DApps
   }),
   // ...other providers
 };
@@ -357,7 +358,7 @@ browsers, so no additional configuration is needed for storage.
 ### Early password validation with a canary
 
 Without additional checks, a wrong password isn't caught until the app attempts to decrypt
-real private state data — which may happen deep inside a transaction flow — producing an
+real private state data, which may happen deep inside a transaction flow, producing an
 opaque WebCrypto `OperationError` instead of a clear message at unlock time.
 
 A canary value written on first unlock lets you validate the password immediately:
@@ -373,10 +374,10 @@ async function unlockWithVerification(provider: PrivateStateProvider) {
       // First unlock: write canary
       await provider.set(CANARY_KEY, CANARY_VALUE);
     }
-    // If get() resolved without throwing, AES-GCM auth tag passed —
+    // If get() resolved without throwing, AES-GCM auth tag passed.
     // password is correct.
   } catch {
-    throw new Error('Incorrect password — private state could not be decrypted');
+    throw new Error('Incorrect password: private state could not be decrypted');
   }
 }
 ```
